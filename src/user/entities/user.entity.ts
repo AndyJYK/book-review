@@ -3,12 +3,12 @@ import { Column, Entity } from "typeorm";
 
 @Entity()
 export class User extends Common {
-    @Column({ type: 'varchar', nullable: true })
-    name?: string;
-
     @Column({ type: 'varchar', length: 50, unique: true })
-    email: string;
+    public readonly email: string;
 
     @Column({ type: 'varchar', length: 255 })
-    password: string;
+    public readonly password: string;
+
+    @Column({ type: 'varchar', nullable: true })
+    public readonly name?: string;
 }

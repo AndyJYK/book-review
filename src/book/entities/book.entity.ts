@@ -4,8 +4,17 @@ import { Column, Entity } from "typeorm";
 @Entity()
 export class Book extends Common {
     @Column({ type: 'varchar' })
-    book_title: string;
+    public readonly book_title: string;
 
     @Column({ type: 'varchar' })
-    book_author: string;
+    public readonly book_subtitle: string;
+
+    @Column({ type: 'simple-array' })
+    public readonly book_authors: string[];
+
+    @Column({ type: 'varchar' })
+    public readonly publisher: string;
+
+    @Column({ type: 'smallint' })
+    public readonly page_count: number;
 }

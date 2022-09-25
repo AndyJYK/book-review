@@ -7,6 +7,9 @@ import { BookModule } from './book/book.module';
 import { ReviewModule } from './review/review.module';
 import { CommonModule } from './common/common.module';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
+import { APP_FILTER } from '@nestjs/core';
+import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 
 @Module({
   imports: [
@@ -26,7 +29,14 @@ import { UserModule } from './user/user.module';
     ReviewModule,
     CommonModule,
     UserModule,
+    AuthModule,
   ],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter
+    }
+  ],
 })
 export class AppModule { }

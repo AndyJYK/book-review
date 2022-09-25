@@ -5,12 +5,15 @@ import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
 @Entity()
 export class Review extends Common {
     @Column({ type: 'varchar' })
-    review_title: string;
+    public readonly review_title: string;
 
     @Column({ type: 'text' })
-    content: string;
+    public readonly content: string;
 
     @OneToOne(() => User, { onDelete: 'CASCADE' })
     @JoinColumn()
-    review_author: User;
+    public readonly review_author: User;
+
+    @Column({ type: 'integer' })
+    public readonly review_view: number;
 }
