@@ -1,8 +1,8 @@
-import { Common } from "src/common/entities/common.entity";
+import { CommonEntity } from "src/common/entities/common.entity";
 import { Column, Entity } from "typeorm";
 
 @Entity()
-export class Book extends Common {
+export class Book extends CommonEntity {
     @Column({ type: 'varchar' })
     public readonly book_title: string;
 

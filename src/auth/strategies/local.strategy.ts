@@ -15,10 +15,6 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
     }
 
     public async validate(email: string, password: string) {
-        try {
-            // return await this.authService.validateUserByEmail({ email, password });
-        } catch (err) {
-            throw new HttpException(err.message, HttpStatus.UNAUTHORIZED);
-        }
+        return await this.authService.validateLocalSignIn({ email, password });
     }
 }

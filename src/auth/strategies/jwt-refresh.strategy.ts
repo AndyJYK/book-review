@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
+import { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { AppRequest } from "src/common/types";
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
@@ -10,8 +10,8 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
         private readonly config: ConfigService
     ) {
         super({
-            jwtFromRequest: ExtractJwt.fromExtractors([(req: AppRequest) => {
-                const { rt } = req;
+            jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => {
+                const { rt } = req.cookies;
                 if (!rt) return null;
                 return rt;
             }]),

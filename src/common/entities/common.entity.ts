@@ -1,6 +1,6 @@
 import { PrimaryGeneratedColumn } from "typeorm";
 
-export class Common {
+export class CommonEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 }

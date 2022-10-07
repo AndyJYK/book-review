@@ -7,7 +7,6 @@ export interface Payload {
     id: string;
     iss?: string;
     aud?: string;
-    scope?: any[];
 }
 
 export interface JwtPayload extends Omit<Payload, 'id'> {

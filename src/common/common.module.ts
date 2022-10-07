@@ -5,16 +5,8 @@ import * as providers from './providers';
 
 @Global()
 @Module({
-    imports: [
-        JwtModule.registerAsync({
-            useFactory: (config: ConfigService) => ({
-                secret: config.get('jwtSecret'),
-                signOptions: { expiresIn: '60h' },
-            }),
-            inject: [ConfigService],
-        }),
-    ],
+    imports: [],
     providers: [...Object.values(providers)],
-    exports: [...Object.values(providers), JwtModule]
+    exports: [...Object.values(providers)]
 })
 export class CommonModule { }

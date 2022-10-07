@@ -1,8 +1,8 @@
-import { Common } from "src/common/entities/common.entity";
-import { Column, Entity } from "typeorm";
+import { CommonEntity } from "src/common/entities/common.entity";
+import { BeforeInsert, Column, Entity } from "typeorm";
 
 @Entity()
-export class User extends Common {
+export class User extends CommonEntity {
     @Column({ type: 'varchar', length: 50, unique: true })
     public readonly email: string;
 
@@ -11,4 +11,7 @@ export class User extends Common {
 
     @Column({ type: 'varchar', nullable: true })
     public readonly name?: string;
+
+    @Column({ type: 'varchar', unique: true, nullable: true })
+    public readonly app_address?: string;
 }

@@ -10,7 +10,7 @@ export class AllExceptionsFilter<T> implements ExceptionFilter {
     let message;
     let code = 'HttpException';
 
-    console.log(exception);
+    console.log(exception, 'all-exceptions.filter.ts');
 
     Logger.error(message, (exception as any).stack, `${req.method} ${req.url}`);
 

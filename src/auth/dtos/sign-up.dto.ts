@@ -1,5 +1,6 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsString } from "class-validator";
+import { ApiProperty, PartialType } from "@nestjs/swagger";
+import { IsEmail, IsOptional, IsString } from "class-validator";
+import { User } from "src/user/entities/user.entity";
 
 
 export class SignUpDto {
@@ -9,6 +10,7 @@ export class SignUpDto {
         required: true
     })
     @IsString()
+    @IsEmail()
     readonly email: string;
 
     @ApiProperty({
@@ -27,3 +29,5 @@ export class SignUpDto {
     @IsString()
     readonly name?: string;
 }
+
+export class SignUpResultDto extends PartialType(User) { };

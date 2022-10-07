@@ -1,7 +1,7 @@
 import { DynamicModule, Module, Provider } from '@nestjs/common';
 import { getDataSourceToken, TypeOrmModule as TModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { TYPEORM_CUSTOM_REPOSITORY } from '../database.constants';
+import { TYPEORM_CUSTOM_REPOSITORY } from '../constants';
 
 @Module({})
 export class TypeOrmModule extends TModule {
