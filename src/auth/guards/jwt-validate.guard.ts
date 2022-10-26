@@ -1,16 +1,14 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
 import { AuthGuard } from "@nestjs/passport";
 import { Response } from "express";
 import { AppRequest } from "src/common/interfaces";
 import { User } from "src/user/entities/user.entity";
-import { IS_PUBLIC } from "../constants";
-import { AuthService, CustomJwtService } from "../services";
+import { CustomJwtService } from "../services";
+import { AuthService } from "../services/auth.service";
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
+export class JwtValidateGuard extends AuthGuard('jwt-validate') implements CanActivate {
     constructor(
-        private reflector: Reflector,
         private readonly authService: AuthService,
         private readonly customJwtService: CustomJwtService,
     ) {
@@ -18,15 +16,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
     }
 
     async canActivate(ctx: ExecutionContext): Promise<boolean> {
-        const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC, [
-            ctx.getHandler(),
-            ctx.getClass(),
-        ]);
-
-        if (isPublic) {
-            return true;
-        }
-
         const req = ctx.switchToHttp().getRequest<AppRequest<User>>();
         const res = ctx.switchToHttp().getResponse<Response>();
 
@@ -52,7 +41,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
                 id: refresh.authId
             });
 
-            req.user = { id: refresh.authId };
+            await super.canActivate(ctx);
+
             res.cookie('at', access_token, {
                 httpOnly: true,
                 sameSite: "lax",

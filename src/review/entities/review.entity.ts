@@ -13,15 +13,21 @@ export class Review extends CommonEntity {
     @Column({ type: 'varchar', nullable: true })
     public readonly review_sub_title: string;
 
+    @Column({ type: 'varchar', nullable: true })
+    public readonly thumbnail: string;
+
     @Column({ type: 'text' })
     public readonly content: string;
 
     @ManyToOne(() => User, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'review_author_id' })
+    @JoinColumn({ name: 'review_author_id', referencedColumnName: 'id' })
     public readonly review_author!: User;
 
-    @Column('uuid')
+    @Column({ type: 'uuid' })
     public readonly review_author_id!: string;
+
+    @Column({ type: 'varchar', length: 255 })
+    public readonly review_author_address!: string;
 
     @Column({ type: 'integer', default: 0 })
     public readonly views: number;

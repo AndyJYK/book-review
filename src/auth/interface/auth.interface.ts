@@ -3,14 +3,13 @@ export interface JwtSign {
     refresh_token: string;
 }
 
-export interface Payload {
+export interface JwtPayload {
+    sub: string;
     id: string;
+    iat?: number;
+    exp?: number;
     iss?: string;
     aud?: string;
 }
 
-export interface JwtPayload extends Omit<Payload, 'id'> {
-    sub: string;
-    iat?: number;
-    exp?: number;
-}
+export interface SignJwtPayload extends Omit<JwtPayload, 'sub'> { };

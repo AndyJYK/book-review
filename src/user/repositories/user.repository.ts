@@ -12,8 +12,8 @@ export class UserRepository extends Repository<User> {
         return false;
     }
 
-    public async checkAppAddressExist(address: string): Promise<boolean> {
-        const user = await this.findOneBy({ app_address: address });
+    public async checkUserAddressExist(address: string): Promise<boolean> {
+        const user = await this.findOneBy({ user_address: address });
         return user ? true : false;
 
     }
@@ -23,7 +23,16 @@ export class UserRepository extends Repository<User> {
     }
 
     public async findUserByEmail(email: string): Promise<User> {
-        return await this.createQueryBuilder('u').where('u.email = :email', { email }).getOne();
+        return await this.createQueryBuilder('u')
+            .where('u.email = :email', { email })
+            .getOne();
+    }
+
+    public async findUserByEmailLocal(email: string): Promise<User> {
+        return await this.createQueryBuilder('u')
+            .addSelect('u.password')
+            .where('u.email = :email', { email })
+            .getOne();
     }
 
     public async createUser(data: Partial<User>): Promise<User> {

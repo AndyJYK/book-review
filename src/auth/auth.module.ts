@@ -4,10 +4,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from 'src/database/typeorm/typeorm.module';
 import { UserRepository } from 'src/user/repositories/user.repository';
 import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
 import { HashRepository } from './repositories/hash.repository';
 import { RefreshRepository } from './repositories/refresh.repository';
 import * as strategies from './strategies';
+import * as services from './services';
 
 @Global()
 @Module({
@@ -27,9 +27,12 @@ import * as strategies from './strategies';
   ],
   controllers: [AuthController],
   providers: [
-    AuthService,
+    ...Object.values(services),
     ...Object.values(strategies),
   ],
-  exports: [JwtModule, AuthService]
+  exports: [
+    JwtModule,
+    ...Object.values(services)
+  ]
 })
 export class AuthModule { }

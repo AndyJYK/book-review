@@ -8,5 +8,5 @@ type Token = {
 
 export interface AppRequest<TData> extends Request {
     cookies: Request['cookies'] extends any ? OptionsFlags<Token> : null,
-    user: TData
+    user: Partial<TData>
 };

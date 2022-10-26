@@ -8,6 +8,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   setupSwagger(app);
 
+  // console.log(globalThis.classValidatorMetadataStorage)
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

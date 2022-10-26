@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { getMaxFromQueryResult } from 'src/utils/query.util';
-import { CreateReviewDto } from './dtos/create-review.dto';
-import { EditReviewDto } from './dtos/edit-review.dto';
+import { UserAvatar } from 'src/user/entities/user-avatar.entity';
+import { User } from 'src/user/entities/user.entity';
+import { GetReviewListDto } from './dtos/get-review-list.dto';
+import { WriteReviewDto } from './dtos/write-review.dto';
 import { Review } from './entities/review.entity';
 import { ReviewRepository } from './repositories/review.repository';
 
@@ -11,10 +12,14 @@ export class ReviewService {
         private readonly reviewRepository: ReviewRepository
     ) { }
 
-    async createBookReview(data: CreateReviewDto, authorId: string): Promise<Review> {
-        if (!data || !data.title || !data.content) throw new HttpException({ message: 'Data not found' }, HttpStatus.BAD_REQUEST);
+    async writeBookReview(data: WriteReviewDto, authorId: string, authorAddress: string): Promise<Review> {
+        if (!data) {
+            throw new HttpException({ message: 'Data is not found' },
+                HttpStatus.BAD_REQUEST
+            );
+        }
 
-        const result = await this.reviewRepository.query(
+        const getMaxReviewId: [{ coalesce: number }] = await this.reviewRepository.query(
             `select
                 COALESCE(max(r.review_id), 0)
             from
@@ -24,8 +29,13 @@ export class ReviewService {
             `,
             [authorId]
         );
-        const maxReviewId = result[0].coalesce;
-        if (maxReviewId === null) throw new HttpException({ message: "Can't get max count" }, HttpStatus.NOT_FOUND);
+
+        const maxReviewId = getMaxReviewId[0].coalesce;
+        if (maxReviewId === null) {
+            throw new HttpException({ message: "Can't get max count" },
+                HttpStatus.NOT_FOUND
+            )
+        }
 
         const newReview = await this.reviewRepository.save(
             this.reviewRepository.create({
@@ -33,19 +43,61 @@ export class ReviewService {
                 review_title: data.title,
                 review_sub_title: data.sub_title,
                 content: data.content,
-                review_author_id: authorId
+                review_author_id: authorId,
+                review_author_address: authorAddress
             }));
         return newReview;
     }
 
-    async getBookReviewById(address: string, reviewId: number): Promise<Review> {
-        const review = await this.reviewRepository.getReviewById(address, reviewId);
-        if (!review) throw new HttpException({ message: 'Cannot find the Review' }, HttpStatus.NOT_FOUND);
-
-        return review;
+    async getBookReviewListByUserAddress({ limit = 15, offset = 0 }: GetReviewListDto, id: string): Promise<Review[]> {
+        return await this.reviewRepository
+            .createQueryBuilder('r')
+            .select([
+                'r.id',
+                'r.create_date',
+                'r.update_date',
+                'r.review_title',
+                'r.thumbnail',
+                'r.views'
+            ])
+            .leftJoinAndSelect('r.review_author', 'u')
+            .leftJoin('u.user_avatar', 'av')
+            .addSelect([
+                'av.id',
+                'av.create_date',
+                'av.update_date',
+                'av.avatar'
+            ])
+            .orderBy('r.views', 'DESC')
+            .limit(limit)
+            .offset(offset)
+            .getMany();
     }
 
-    async editBookReview(data: EditReviewDto, authorId: string) {
-
+    async getBookReviewListInPopularity({ limit = 15, offset = 0 }: GetReviewListDto): Promise<Review[]> {
+        return await this.reviewRepository
+            .createQueryBuilder('r')
+            .select([
+                'r.id',
+                'r.create_date',
+                'r.update_date',
+                'r.review_id',
+                'r.review_title',
+                'r.thumbnail',
+                'r.views'
+            ])
+            .leftJoin('r.review_author', 'u')
+            .addSelect([
+                'u.id',
+                'u.email',
+                'u.name',
+                'u.user_address'
+            ])
+            .leftJoin('u.user_avatar', 'av')
+            .addSelect(['av.avatar'])
+            .orderBy('r.views', 'DESC')
+            .limit(limit)
+            .offset(offset)
+            .getMany();
     }
 }

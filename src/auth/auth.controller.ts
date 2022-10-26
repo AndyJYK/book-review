@@ -1,21 +1,22 @@
-import { Body, Controller, Get, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Res, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { AppRequest } from 'src/common/interfaces';
 import { User } from 'src/user/entities/user.entity';
-import { AuthService } from './auth.service';
+import { AuthService } from './services/auth.service';
 import { MyProfile } from './decorators/my-profile.decorator';
 import { Public } from './decorators/public.decorator';
 import { SignUpDto } from './dtos/sign-up.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { JwtPayload } from './interface/auth.interface';
+import { CustomJwtService } from './services';
 
 @ApiTags('Auth Api')
 @Controller('auth')
 export class AuthController {
     constructor(
-        private readonly authService: AuthService
+        private readonly authService: AuthService,
+        private readonly customJwtService: CustomJwtService
     ) { }
 
     @ApiOperation({ summary: 'Sign Up Api' })
@@ -45,10 +46,17 @@ export class AuthController {
     @UseGuards(LocalAuthGuard)
     @Post('/sign-in')
     async signIn(@MyProfile() user: User, @Res() res: Response) {
-        const tokens = this.authService.jwtSign({ id: user.id }, { access_token: true, refresh_token: true });
-        const refreshId = await this.authService.saveRefreshTokenInToDB(tokens.refresh_token, user.id);
+        const payload: Omit<JwtPayload, 'sub'> = {
+            iss: 'localhost',
+            id: user.id,
+        }
 
-        res.cookie('at', tokens.access_token, {
+        const access_token = this.customJwtService.getAccessTokenFromJWT({ sub: 'at', ...payload });
+        const refresh_token = this.customJwtService.getRefreshTokenFromJWT({ sub: 'rt', ...payload });
+
+        const refreshId = await this.authService.saveRefreshTokenInToDB(refresh_token, user.id);
+
+        res.cookie('at', access_token, {
             httpOnly: true,
             sameSite: "lax",
             maxAge: 30 * 60 * 1000,
@@ -60,6 +68,7 @@ export class AuthController {
             maxAge: 14 * 24 * 60 * 60 * 1000,
             // secure: true
         })
+
         return res.status(HttpStatus.OK).json({
             message: 'login success',
             status: HttpStatus.OK,
@@ -67,14 +76,17 @@ export class AuthController {
         })
     }
 
+    // Refectoring Process
     @ApiOperation({ summary: 'Sign Out Api' })
     @ApiResponse({ status: 200, description: 'Sign Out Success.' })
     @UseGuards(JwtAuthGuard)
     @Post('/sign-out')
     async signOut(@MyProfile() user: User, @Res() res: Response) {
         await this.authService.removeRefreshTokenFromDB(user.id);
+
         res.clearCookie('at');
         res.clearCookie('rt');
+
         return res.status(HttpStatus.OK).json({
             message: 'logout success',
             status: HttpStatus.OK
